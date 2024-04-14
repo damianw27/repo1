@@ -38,11 +38,14 @@ jobs:
       - name: Check For Any Changes
         id: check
         run: |
-          if [ ! -z "$(git diff --name-only $(git merge-base --fork-point remotes/origin/main || git merge-base remotes/origin/main HEAD))" ]; then
-            echo ::set-output name=shouldCreatePr::no
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "::set-output name=skip_steps::false"
+          else
+            echo "::set-output name=skip_steps::true"
           fi
       - name: Create Update Grammar Pull Request
-        if: steps.check.outputs.shouldCreatePr != 'no'
+        if: steps.check.outputs.skip_steps != 'true'
         run: |
           git add .
           git commit -m "updated grammar source code;"
