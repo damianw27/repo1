@@ -1,110 +1,122 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
-const { downloadFile } = require('./util/download-file');
-const { removeDirectory } = require('./util/remove-directory');
-const { getFilenamesInDir } = require('./util/get-filenames-in-dir');
-const { renameFileWithPattern } = require('./util/rename-file-with-pattern');
-const { convertToKebabCase } = require('./util/convert-to-kebab-case');
-const { replaceTextInFile } = require('./util/replace-text-in-file');
+const {execSync} = require('child_process');
+const {downloadFile} = require('./util/download-file');
+const {removeDirectory} = require('./util/remove-directory');
+const {getFilenamesInDir} = require('./util/get-filenames-in-dir');
+const {renameFileWithPattern} = require('./util/rename-file-with-pattern');
+const {convertToKebabCase} = require('./util/convert-to-kebab-case');
+const {replaceTextInFile} = require('./util/replace-text-in-file');
 
 require('dotenv').config();
 
 (async () => {
-  const workingDir = path.join(__dirname, '..');
+    const workingDir = path.join(__dirname, '..');
 
-  console.log('Validating environment...');
+    console.log('Validating environment...');
 
-  const samplesDirPath = path.join(workingDir, 'tmp', 'samples');
-  const grammarFilePath = path.join(workingDir, 'tmp', 'JSON.g4');
+    const samplesDirPath = path.join(workingDir, 'tmp', 'samples');
+    const grammarFilePath = path.join(workingDir, 'tmp', 'JSON.g4');
 
-  if (!fs.existsSync(samplesDirPath) || !fs.existsSync(grammarFilePath)) {
-    console.log('Environment is not ready for grammar source code generation.');
-    console.log('Perform following command to get latest data from opengql/grammar repository:');
-    console.log('>\tyarn grammar:download');
-    return;
-  }
+    if (!fs.existsSync(samplesDirPath) || !fs.existsSync(grammarFilePath)) {
+        console.log('Environment is not ready for grammar source code generation.');
+        console.log('Perform following command to get latest data from opengql/grammar repository:');
+        console.log('>\tyarn grammar:download');
+        return;
+    }
 
-  console.log('Checking ANTLR4 binary...');
+    console.log('Checking ANTLR4 binary...');
 
-  const antlrBinFilePath = path.join(workingDir, 'bin', 'antlr4.jar');
-  const antlrBinFileUrl = 'https://www.antlr.org/download/antlr-4.13.1-complete.jar';
+    const antlrBinFilePath = path.join(workingDir, 'bin', 'antlr4.jar');
+    const antlrBinFileUrl = 'https://www.antlr.org/download/antlr-4.13.1-complete.jar';
 
-  let binDir = path.join(workingDir, 'bin');
+    let binDir = path.join(workingDir, 'bin');
 
-  if (!fs.existsSync(binDir)) {
-    fs.mkdirSync(binDir);
-  }
+    if (!fs.existsSync(binDir)) {
+        fs.mkdirSync(binDir);
+    }
 
-  if (!fs.existsSync(antlrBinFilePath)) {
+    if (!fs.existsSync(antlrBinFilePath)) {
 
-    await downloadFile(antlrBinFileUrl, antlrBinFilePath);
-  }
+        await downloadFile(antlrBinFileUrl, antlrBinFilePath);
+    }
 
-  console.log('Cleaning up before parser generation...');
+    console.log('Cleaning up before parser generation...');
 
-  const outputDir = path.join(workingDir, 'module', 'worker', 'src', 'generated');
+    const outputDir = path.join(workingDir, 'module', 'worker', 'src', 'generated');
 
-  removeDirectory(outputDir);
+    removeDirectory(outputDir);
 
-  console.log('Generating grammar code...');
+    console.log('Generating grammar code...');
 
-  const grammarFile = './tmp/JSON.g4';
-  const command = `java -jar ${antlrBinFilePath} -Dlanguage=JavaScript -o ${outputDir} ${grammarFile}`;
+    const grammarFile = './tmp/JSON.g4';
+    const command = `java -jar ${antlrBinFilePath} -Dlanguage=JavaScript -o ${outputDir} ${grammarFile}`;
 
-  execSync(command);
+    execSync(command);
 
-  console.log('Removing unnecessary files from generation process...');
+    const tmpOutputDir = path.join(outputDir, 'tmp');
 
-  const unnecessaryFiles = getFilenamesInDir(outputDir)
-    .filter((fileName) => fileName.endsWith('.interp') || fileName.endsWith('.tokens'))
-    .map((fileName) => path.join(outputDir, fileName));
+    if (fs.existsSync(tmpOutputDir)) {
+        getFilenamesInDir(tmpOutputDir).forEach(fileName => {
+          const sourceFile = path.join(tmpOutputDir, fileName);
+          const destinationFile = path.join(outputDir, fileName);
+          fs.renameSync(sourceFile, destinationFile);
+        });
 
-  await unnecessaryFiles.forEach((filePath) => fs.unlinkSync(filePath));
+        removeDirectory(tmpOutputDir);
+    }
 
-  console.log('Renaming files from generation process...');
+    console.log('Removing unnecessary files from generation process...');
 
-  const outputFiles = getFilenamesInDir(outputDir).map((fileName) => path.join(outputDir, fileName));
+    const unnecessaryFiles = getFilenamesInDir(outputDir)
+        .filter((fileName) => fileName.endsWith('.interp') || fileName.endsWith('.tokens'))
+        .map((fileName) => path.join(outputDir, fileName));
 
-  for (const outputFile of outputFiles) {
-    renameFileWithPattern(outputFile, convertToKebabCase);
-  }
+    await unnecessaryFiles.forEach((filePath) => fs.unlinkSync(filePath));
 
-  console.log('Refactoring generated file...');
+    console.log('Renaming files from generation process...');
 
-  const parserFilePath = path.join(workingDir, 'module', 'worker', 'src', 'generated', 'json-parser.js');
+    const outputFiles = getFilenamesInDir(outputDir).map((fileName) => path.join(outputDir, fileName));
 
-  replaceTextInFile(parserFilePath, "'./JSONListener.js'", "'./json-listener'");
+    for (const outputFile of outputFiles) {
+        renameFileWithPattern(outputFile, convertToKebabCase);
+    }
 
-  console.log('Generating examples file...');
+    console.log('Refactoring generated file...');
 
-  const samplesPath = path.join(workingDir, 'tmp', 'samples');
+    const parserFilePath = path.join(workingDir, 'module', 'worker', 'src', 'generated', 'json-parser.js');
 
-  const examples = getFilenamesInDir(samplesPath).map((sampleFileName) => {
-    const sampleFilePath = path.join(workingDir, 'tmp', 'samples', sampleFileName);
+    replaceTextInFile(parserFilePath, "'./JSONListener.js'", "'./json-listener'");
 
-    const code = `${fs.readFileSync(sampleFilePath)}`
-        .replace(/\n/g, '\\n')
-        .replace(/'/g, "\\'")
-        .replace(/"/g, '\\"');
+    console.log('Generating examples file...');
 
-    const exampleName = sampleFileName
-        .replace(/\.json/g, '')
-        .replace(/\\_/g, ' ');
+    const samplesPath = path.join(workingDir, 'tmp', 'samples');
 
-    return `{
+    const examples = getFilenamesInDir(samplesPath).map((sampleFileName) => {
+        const sampleFilePath = path.join(workingDir, 'tmp', 'samples', sampleFileName);
+
+        const code = `${fs.readFileSync(sampleFilePath)}`
+            .replace(/\n/g, '\\n')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '\\"');
+
+        const exampleName = sampleFileName
+            .replace(/\.json/g, '')
+            .replace(/\\_/g, ' ');
+
+        return `{
       name: "${exampleName}",
       code: "${code}",
     }`;
-  });
+    });
 
-  const examplesFilePath = path.join(workingDir, 'public', 'json-examples.js');
+    const examplesFilePath = path.join(workingDir, 'public', 'json-examples.js');
 
-  const examplesSource = `
+    const examplesSource = `
   export const JsonExamples = [\n
   ${examples}
   ];\n
   `;
 
-  fs.writeFileSync(examplesFilePath, examplesSource);
+    fs.writeFileSync(examplesFilePath, examplesSource);
 })();
