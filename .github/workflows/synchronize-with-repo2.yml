@@ -35,6 +35,13 @@ jobs:
           yarn
           yarn grammar:download
           yarn grammar:build
+      - name: Check For Any Changes
+        run: |
+          echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
+          if [ -z "${{ steps.git_changes.outputs.files }}" ]; then
+            echo "No changes detected. Stopping workflow."
+            exit 78  # 78 is a neutral exit code
+          fi
       - name: Create Update Grammar Pull Request
         run: |
           git add .
