@@ -13,6 +13,8 @@ const githubDownload = async (githubDownloadUrl, filePath) => {
       'X-GitHub-Api-Version': '2022-11-28',
     };
 
+    console.log(`Attempt to download file: '${githubDownloadUrl}'`);
+    
     const response = await axios({ url: githubDownloadUrl, method: 'get', responseType: 'stream', headers });
 
     await saveFileFromResponse(response, writer, tmpFilePath);
@@ -29,6 +31,8 @@ const downloadFromGithub = async (path, repository) => {
     'X-GitHub-Api-Version': '2022-11-28',
   };
 
+  console.log(`Attempt to download file data for '${path}' from '${repository}'`);
+  
   const response = await axios({
     url: `https://api.github.com/repos/${repository}/contents/${path}`,
     method: 'get',
