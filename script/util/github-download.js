@@ -9,7 +9,7 @@ const githubDownload = async (githubDownloadUrl, filePath) => {
   try {
     const headers = {
       Accept: '*/*',
-      Authorization: `Bearer ${process.env.GRAMMAR_REPOSITORY_TOKEN}`,
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
       'X-GitHub-Api-Version': '2022-11-28',
     };
 
