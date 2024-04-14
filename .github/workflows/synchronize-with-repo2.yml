@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  GRAMMAR_REPOSITORY_TOKEN: ${{ GITHUB_TOKEN }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
