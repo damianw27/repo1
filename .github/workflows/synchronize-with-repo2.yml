@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,6 +25,8 @@ jobs:
     - run: npm install -g yarn
     - run: yarn
     - run: yarn grammar:download
+      env:
+        GITHUB_TOKEN: ${{ secrets.BUILD_TOKEN }}
     - run: yarn grammar:build
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v6
