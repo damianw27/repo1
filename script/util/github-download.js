@@ -12,8 +12,6 @@ const githubDownload = async (githubDownloadUrl, filePath) => {
       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
       'X-GitHub-Api-Version': '2022-11-28',
     };
-
-    console.log(`Attempt to download file: '${githubDownloadUrl}'`);
     
     const response = await axios({ url: githubDownloadUrl, method: 'get', responseType: 'stream', headers });
 
@@ -30,8 +28,6 @@ const downloadFromGithub = async (path, repository) => {
     Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
     'X-GitHub-Api-Version': '2022-11-28',
   };
-
-  console.log(`Attempt to download file data for '${path}' from '${repository}'`);
 
   try {
     const response = await axios({

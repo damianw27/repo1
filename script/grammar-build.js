@@ -98,7 +98,7 @@ require('dotenv').config();
     }`;
   });
 
-  const examplesFilePath = path.join(workingDir, 'build', 'json-examples.js');
+  const examplesFilePath = path.join(workingDir, 'public', 'json-examples.js');
 
   const examplesSource = `
   export const JsonExamples = [\n

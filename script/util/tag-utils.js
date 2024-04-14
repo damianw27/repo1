@@ -1,25 +1,54 @@
-const { Octokit } = require('@octokit/rest');
+const axios = require("axios");
+
+async function getLastCommitSha(owner, repo) {
+    try {
+        const headers = {
+            Accept: '*/*',
+            Authorization: `Bearer ${process.env.GRAMMAR_REPOSITORY_TOKEN}`,
+            'X-GitHub-Api-Version': '2022-11-28',
+        };
+
+        const url = `https://api.github.com/repos/${owner}/${repo}/branches/master`;
+        const response = await axios({ url, method: 'get', responseType: 'json', headers });
+        return response.data.commit.sha;
+    } catch (error) {
+        console.error('Error getting last commit SHA:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+}
 
 async function createTag(owner, repo, version) {
-    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
     try {
-        const createTagResponse = await octokit.git.createTag({
-            owner,
-            repo,
-            tag: `v${version}`,
-            message: `Release version v${version}`,
-            object: 'master',
-            type: 'commit'
+        const headers = {
+            Accept: '*/*',
+            Authorization: `Bearer ${process.env.GRAMMAR_REPOSITORY_TOKEN}`,
+            'X-GitHub-Api-Version': '2022-11-28',
+        };
+
+        const currentCommitSha = await getLastCommitSha(owner, repo);
+        console.log(currentCommitSha);
+
+        await axios({
+            method: 'post',
+            url: `https://api.github.com/repos/${owner}/${repo}/git/refs`,
+            headers,
+            data: {
+                ref: `refs/tags/v${version}`,
+                sha: currentCommitSha
+            }
         });
 
-        const commitSha = createTagResponse.data.sha;
-
-        await octokit.git.createRef({
-            owner,
-            repo,
-            ref: `refs/tags/v${version}`,
-            sha: commitSha
+        await axios({
+            url: `https://api.github.com/repos/${owner}/${repo}/git/tags`,
+            method: 'post',
+            responseType: 'json',
+            headers,
+            data: {
+                tag: `v${version}`,
+                message: `Release version v${version}`,
+                object: currentCommitSha,
+                type: 'commit'
+            }
         });
 
         console.log(`Tag "v${version}" created successfully.`);
@@ -30,17 +59,19 @@ async function createTag(owner, repo, version) {
 }
 
 async function getTags(owner, repo) {
-    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
     try {
-        const response = await octokit.repos.listTags({
-            owner,
-            repo
-        });
+        const headers = {
+            Accept: '*/*',
+            Authorization: `Bearer ${process.env.GRAMMAR_REPOSITORY_TOKEN}`,
+            'X-GitHub-Api-Version': '2022-11-28',
+        };
 
+        const url = `https://api.github.com/repos/${owner}/${repo}/tags`
+        const response = await axios({ url, method: 'get', responseType: 'json', headers });
         return response.data.map(tag => tag.name);
     } catch (error) {
-        console.error('Error fetching tags:', error.message);
+        console.error(`Error downloading file: ${error.message}`);
+        return [];
     }
 }
 

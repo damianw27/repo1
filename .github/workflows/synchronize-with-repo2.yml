@@ -11,24 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '11'
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
-        cache: 'npm'
-    - run: npm install -g yarn
-    - run: yarn
-    - run: yarn grammar:download
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - run: yarn grammar:build
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v6
-      with:
-        title: "Grammar releas synchronization"
+      - uses: actions/checkout@v4
+      - name: Use Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm install -g yarn
+      - run: yarn
+      - run: yarn grammar:download
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: yarn grammar:build
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "Grammar release synchronization"

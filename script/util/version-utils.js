@@ -4,9 +4,9 @@ const fs = require("fs");
 
 function readVersionFromTmpDir() {
     const workingDir = path.join(__dirname, '..', '..');
-    const grammarVersionFile = path.join(workingDir, 'version.json');
+    const grammarVersionFile = path.join(workingDir, 'tmp', 'version.json');
 
-    if (fs.existsSync(grammarVersionFile)) {
+    if (!fs.existsSync(grammarVersionFile)) {
         throw new Error('Grammar version file is not existing.')
     }
 

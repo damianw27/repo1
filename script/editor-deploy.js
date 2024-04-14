@@ -9,6 +9,7 @@ require('dotenv').config();
 
 (async () => {
   const workingDir = path.join(__dirname, '..');
+  const publicDir = path.join(__dirname, '..', 'public');
 
   console.log('Validating environment...');
 
@@ -24,9 +25,9 @@ require('dotenv').config();
   console.log('Creating new tag if not exists...');
 
   const currentVersion = getCurrentVersion();
-  const existingTags = getTags('damianw27', 'repo1');
+  const existingTags = await getTags('damianw27', 'repo1');
 
-  if (!existingTags.includes(currentVersion)) {
+  if (!existingTags.includes(`v${currentVersion}`)) {
     await createTag('damianw27', 'repo1', currentVersion);
   }
 
@@ -35,11 +36,17 @@ require('dotenv').config();
   const buildDir = path.join(workingDir, 'build');
 
   removeDirectory(buildDir);
+  fs.mkdirSync(buildDir);
+
 
   console.log('Building worker and editor sources...');
 
   const tagFile = path.join(buildDir, 'tag.txt');
   fs.writeFileSync(tagFile, currentVersion);
+
+  const indexFilePath = path.join(publicDir, 'index.html');
+  const indexBuildPath = path.join(buildDir, 'index.html');
+  fs.copyFileSync(indexFilePath, indexBuildPath);
 
   console.log('Deploy application to GitHub Pages...');
 
