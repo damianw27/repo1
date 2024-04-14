@@ -36,12 +36,13 @@ jobs:
           yarn grammar:download
           yarn grammar:build
       - name: Check For Any Changes
+        id: check
         run: |
-          if [ -z "$(git diff --name-only $(git merge-base --fork-point remotes/origin/main || git merge-base remotes/origin/main HEAD))" ]; then
-            echo "No changes detected. Stopping workflow."
-            exit 0
+          if [ ! -z "$(git diff --name-only $(git merge-base --fork-point remotes/origin/main || git merge-base remotes/origin/main HEAD))" ]; then
+            echo ::set-output name=shouldCreatePr::no
           fi
       - name: Create Update Grammar Pull Request
+        if: steps.check.outputs.shouldCreatePr != 'no'
         run: |
           git add .
           git commit -m "updated grammar source code;"
