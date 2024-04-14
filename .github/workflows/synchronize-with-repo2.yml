@@ -15,6 +15,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - uses: 1arp/create-a-file-action@0.4.5
+      with:
+        path: '.'
+        isAbsolutePath: false
+        file: '.env'
+        content: |
+          GITHUB_TOKEN=${{ secrets.BUILD_TOKEN }}
     - name: Use Java
       uses: actions/setup-java@v4
       with:
