@@ -27,15 +27,19 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm install -g yarn
-      - run: yarn
-      - run: yarn grammar:download
-      - run: yarn grammar:build
-      - name: Create New Branch
+      - name: Create Update Grammar Branch
         run: |
-          git switch -c update_grammar-$(cat ./public/tag.txt)
+          git switch -c update_grammar
+      - name: Build Grammar Sources
+        run: |
+          yarn
+          yarn grammar:download
+          yarn grammar:build
+      - name: Create Update Grammar Pull Request
+        run: |
           git add .
           git commit -m "updated grammar source code;"
-          git push -u origin update_grammar-$(cat ./public/tag.txt)
+          git push -u origin update_grammar --force
           gh pr create -B main -H update_grammar-$(cat ./public/tag.txt) --title 'Grammar Update' --body 'Updated grammar sources from grammar repository changes.'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
