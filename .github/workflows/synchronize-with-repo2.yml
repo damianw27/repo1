@@ -37,8 +37,7 @@ jobs:
           yarn grammar:build
       - name: Check For Any Changes
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > changed_files.txt
-          if [ ! -s "changed_files.txt" ]; then
+          if [ -z "$(git diff --name-only $(git merge-base --fork-point remotes/origin/main || git merge-base remotes/origin/main HEAD))" ]; then
             echo "No changes detected. Stopping workflow."
             exit 0
           fi
