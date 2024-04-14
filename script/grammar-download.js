@@ -6,6 +6,7 @@ const fs = require('fs');
 require('dotenv').config();
 
 (async () => {
+  console.log(process.env.GRAMMAR_REPOSITORY_TOKEN);
   const workingDir = path.join(__dirname, '..');
 
   console.log('Cleaning up before downloading new files...');
