@@ -29,10 +29,12 @@ jobs:
       - run: yarn
       - run: yarn grammar:download
       - run: yarn grammar:build
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: update changelog
-          title: Update Changelog
-          body: Update changelog to reflect release changes
-          base: main
+      - name: Create New Branch
+        run: |
+          git switch -c update_grammar-$(cat ./public/tag.txt)
+          git add .
+          git commit -m "updated grammar source code;"
+          git push -u origin update_grammar-$(cat ./public/tag.txt)
+          gh pr create -B main -H update_grammar-$(cat ./public/tag.txt) --title 'Grammar Update' --body 'Updated grammar sources from grammar repository changes.'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
