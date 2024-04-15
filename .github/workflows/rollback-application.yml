@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Fetch tag
+        run: git fetch --tags origin ${{ github.event.inputs.tag }}
+
       - name: Determine commit hash of the tag
         id: get_commit_hash
         run: |
