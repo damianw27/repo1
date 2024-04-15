@@ -41,6 +41,33 @@ export default class JSONListener extends antlr4.tree.ParseTreeListener {
 	}
 
 
+	// Enter a parse tree produced by JSONParser#day.
+	enterDay(ctx) {
+	}
+
+	// Exit a parse tree produced by JSONParser#day.
+	exitDay(ctx) {
+	}
+
+
+	// Enter a parse tree produced by JSONParser#month.
+	enterMonth(ctx) {
+	}
+
+	// Exit a parse tree produced by JSONParser#month.
+	exitMonth(ctx) {
+	}
+
+
+	// Enter a parse tree produced by JSONParser#year.
+	enterYear(ctx) {
+	}
+
+	// Exit a parse tree produced by JSONParser#year.
+	exitYear(ctx) {
+	}
+
+
 	// Enter a parse tree produced by JSONParser#value.
 	enterValue(ctx) {
 	}
