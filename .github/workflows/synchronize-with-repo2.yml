@@ -29,10 +29,10 @@ jobs:
       - name: Install Dependencies
         run: npm install -g yarn
 
-      - name: Create Origin Update Gramar Branch If Exists
+      - name: Delete Origin Update Gramar Branch If Exists
         run: |
           if git ls-remote --exit-code --heads origin update_grammar; then
-            git push origin --delete update_grammar
+            git push origin --delete -f update_grammar
           fi
       
       - name: Create Update Grammar Branch
