@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "main" ]
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +16,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
+      
       - name: Setup Environment
         run: |
           npm install -g yarn
@@ -24,4 +28,6 @@ jobs:
 #          yarn test:worker
 
       - name: Deploy
-        run: yarn editor:deploy
+        run: |
+          yarn grammar:download
+          yarn editor:deploy
