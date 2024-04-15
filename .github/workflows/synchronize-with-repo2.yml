@@ -26,7 +26,14 @@ jobs:
           node-version: 20
           cache: 'npm'
       
-      - run: npm install -g yarn
+      - name: Install Dependencies
+        run: npm install -g yarn
+
+      - name: Create Origin Update Gramar Branch If Exists
+        run: |
+          if git ls-remote --exit-code --heads origin update_grammar; then
+            git push origin --delete update_grammar
+          fi
       
       - name: Create Update Grammar Branch
         run: |
@@ -47,20 +54,6 @@ jobs:
           else
             echo "skip_steps=true" >> $GITHUB_OUTPUT
           fi
-
-      - name: Check if Pull Request Exists
-        id: pr_exists
-        run: |
-          if gh pr list --state open --json number --jq ".[] | select(.head.ref == \"update_grammar\")"; then
-            echo "result=true" >> $GITHUB_OUTPUT
-          else
-            echo "result=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Delete Existing Pull Request
-        if: steps.pr_exists.outputs.result == 'true'
-        run: |
-          git push origin --delete -f update_grammar
       
       - name: Create Update Grammar Pull Request
         if: steps.check.outputs.skip_steps != 'true'
