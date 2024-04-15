@@ -60,7 +60,7 @@ jobs:
       - name: Delete Existing Pull Request
         if: steps.pr_exists.outputs.result == 'true'
         run: |
-          gh pr list --state open --json number --jq ".[] | select(.head.ref == \"origin/update_grammar\") | .number" | xargs -I {} gh pr close {}
+          git push origin --delete -f update_grammar
       
       - name: Create Update Grammar Pull Request
         if: steps.check.outputs.skip_steps != 'true'
