@@ -44,6 +44,12 @@ jobs:
           yarn
           yarn grammar:download
           yarn grammar:build
+          MAJOR=$(jq -r '.major' tmp/version.json)
+          MINOR=$(jq -r '.minor' tmp/version.json)
+          PATCH=$(jq -r '.patch' tmp/version.json)
+          VERSION="$MAJOR.$MINOR.$PATCH"
+          jq ".grammarVersion = \"$VERSION\"" package.json >> temp.json
+          mv temp.json package.json
       
       - name: Check For Any Changes
         id: check
