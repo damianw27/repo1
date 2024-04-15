@@ -13,25 +13,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: fregante/setup-git-user@v2
+      
       - name: Use Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
+      
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
           cache: 'npm'
+      
       - run: npm install -g yarn
+      
       - name: Create Update Grammar Branch
         run: |
           git switch -c update_grammar
+      
       - name: Build Grammar Sources
         run: |
           yarn
           yarn grammar:download
           yarn grammar:build
+      
       - name: Check For Any Changes
         id: check
         run: |
@@ -41,6 +47,21 @@ jobs:
           else
             echo "skip_steps=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Check if Pull Request Exists
+        id: pr_exists
+        run: |
+          if gh pr list --state open --json number --jq ".[] | select(.head.ref == 'update_grammar')"; then
+            echo "result=true" >> $GITHUB_OUTPUT
+          else
+            echo "result=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Delete Existing Pull Request
+        if: steps.pr_exists.outputs.result == 'true'
+        run: |
+          gh pr list --state open --json number --jq ".[] | select(.head.ref == 'update_grammar') | .number" | xargs -I {} gh pr close {}
+      
       - name: Create Update Grammar Pull Request
         if: steps.check.outputs.skip_steps != 'true'
         run: |
