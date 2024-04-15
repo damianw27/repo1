@@ -1,0 +1,27 @@
+name: Delpoy Application
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Setup Environment
+        run: |
+          npm install -g yarn
+          yarn
+
+#      - name: Verify Is Application Valid To Release
+#        run: |
+#          yarn test:editor
+#          yarn test:worker
+
+      - name: Deploy
+        run: yarn editor:deploy
