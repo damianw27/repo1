@@ -18,8 +18,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Checkout To Tag
-        run: git checkout tags/${{ github.event.inputs.tag }} -b main
+      - name: Determine commit hash of the tag
+        id: get_commit_hash
+        run: |
+          commit_hash=$(git ls-remote --tags origin refs/tags/${{ github.event.inputs.tag }} | cut -f1)
+          echo "::set-output name=commit_hash::$commit_hash"
+
+      - name: Create new branch at the commit associated with the tag
+        run: |
+          git checkout -b new_branch ${{ steps.get_commit_hash.outputs.commit_hash }}
 
       - name: Setup Environment
         run: |
