@@ -51,7 +51,7 @@ jobs:
       - name: Check if Pull Request Exists
         id: pr_exists
         run: |
-          if gh pr list --state open --json number --jq ".[] | select(.head.ref == \"update_grammar\")"; then
+          if gh pr list --state open --json number --jq ".[] | select(.head.ref == \"origin/update_grammar\")"; then
             echo "result=true" >> $GITHUB_OUTPUT
           else
             echo "result=false" >> $GITHUB_OUTPUT
@@ -60,7 +60,7 @@ jobs:
       - name: Delete Existing Pull Request
         if: steps.pr_exists.outputs.result == 'true'
         run: |
-          gh pr list --state open --json number --jq ".[] | select(.head.ref == \"update_grammar\") | .number" | xargs -I {} gh pr close {}
+          gh pr list --state open --json number --jq ".[] | select(.head.ref == \"origin/update_grammar\") | .number" | xargs -I {} gh pr close {}
       
       - name: Create Update Grammar Pull Request
         if: steps.check.outputs.skip_steps != 'true'
