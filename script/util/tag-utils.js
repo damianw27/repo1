@@ -4,7 +4,7 @@ async function getLastCommitSha(owner, repo) {
     try {
         const headers = {
             Accept: '*/*',
-            Authorization: `Bearer ${process.env.GRAMMAR_REPOSITORY_TOKEN}`,
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
             'X-GitHub-Api-Version': '2022-11-28',
         };
 
@@ -21,7 +21,7 @@ async function createTag(owner, repo, version) {
     try {
         const headers = {
             Accept: '*/*',
-            Authorization: `Bearer ${process.env.GRAMMAR_REPOSITORY_TOKEN}`,
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
             'X-GitHub-Api-Version': '2022-11-28',
         };
 
@@ -62,7 +62,7 @@ async function getTags(owner, repo) {
     try {
         const headers = {
             Accept: '*/*',
-            Authorization: `Bearer ${process.env.GRAMMAR_REPOSITORY_TOKEN}`,
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
             'X-GitHub-Api-Version': '2022-11-28',
         };
 
